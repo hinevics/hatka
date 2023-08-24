@@ -50,7 +50,7 @@ def parser():
             href = rent.find_all('a')[0]
             number = find_number(href)
             logger.info(f'parsing flat {number}: Start!')
-            new_url =  URL_BASE + href['href']
+            new_url = URL_BASE + href['href']
             response = requests.get(new_url)
             soup_rent = BeautifulSoup(response.content, 'html.parser')
             if not str(n) in data.keys():
@@ -62,12 +62,13 @@ def parser():
                 logger.debug(f'received: title: {title}')
                 rent['title'] = title
 
-                adres = soup_rent.select('li.md\:w-auto')[0].text
+                adres = soup_rent.select(r'li.md\:w-auto')[0].text
                 logger.debug(f'received: adres: {adres}')
 
                 rent['adres'] = adres
 
-                price = soup_rent.select('.md\:items-center > div:nth-child(1) > h2:nth-child(1)')[0].text
+                price = soup_rent.select(
+                    r'.md\:items-center > div:nth-child(1) > h2:nth-child(1)')[0].text
                 logger.debug(f'received: price: {price}')
                 data[number] = rent
                 logger.info(f'parsing flat {number}: Completed!')
