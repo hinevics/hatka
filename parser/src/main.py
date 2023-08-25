@@ -4,6 +4,7 @@ import requests
 import logging
 import colorlog
 import pickle
+import pathlib
 
 from config import PATH_SAVE
 
@@ -36,6 +37,9 @@ def get_page(url: str, number: int) -> str:
 
 
 def parser():
+    path_save = pathlib.Path(PATH_SAVE)
+    if not path_save.exists():
+        raise FileExistsError('Path not normal!!!')
     data = {}
     URL_PAGE = r'https://realt.by/belarus/rent/flat-for-long/?page={number}'
     URL_BASE = r'https://realt.by'
@@ -49,7 +53,7 @@ def parser():
         for rent in div_elements_with_data_index:
             href = rent.find_all('a')[0]
             number = find_number(href)
-            logger.info(f'parsing flat {number}: Start!')
+            logger.debug(f'parsing flat {number}: Start!')
             new_url = URL_BASE + href['href']
             response = requests.get(new_url)
             soup_rent = BeautifulSoup(response.content, 'html.parser')
@@ -58,21 +62,40 @@ def parser():
                     'href': new_url
                 }
 
-                title = soup_rent.select('h1.order-1')[0].text
-                logger.debug(f'received: title: {title}')
+                # Title
+                title_list = soup_rent.select('h1.order-1')
+                if title_list:
+                    title = title_list[0].text
+                    logger.debug(f'received: title: {title}')
+                else:
+                    title = None
+                    logger.error(f'received: title: {title}')
                 rent['title'] = title
 
-                adres = soup_rent.select(r'li.md\:w-auto')[0].text
-                logger.debug(f'received: adres: {adres}')
-
+                # Adres
+                adres_list = soup_rent.select(r'li.md\:w-auto')
+                if adres_list:
+                    adres = adres_list[0].text
+                    logger.debug(f'received: adres: {adres}')
+                else:
+                    adres = None
+                    logger.error(f'received: adres: {adres}')
                 rent['adres'] = adres
 
-                price = soup_rent.select(
-                    r'.md\:items-center > div:nth-child(1) > h2:nth-child(1)')[0].text
-                logger.debug(f'received: price: {price}')
+                # Price
+                price_list = soup_rent.select(
+                    r'.md\:items-center > div:nth-child(1) > h2:nth-child(1)')
+                if price_list:
+                    price = price_list[0].text
+                    logger.debug(f'received: price: {price}')
+                else:
+                    price = None
+                    logger.error(f'received: price: {price}')
+                rent['price'] = price
+
                 data[number] = rent
-                logger.info(f'parsing flat {number}: Completed!')
-        with open(PATH_SAVE + f"/data_{n}.pkl", "wb") as file:
+                logger.debug(f'parsing flat {number}: Completed!')
+        with open(path_save + f"/data_{n}.pkl", "wb") as file:
             pickle.dump(data, file)
         logger.info(f'parsing page {n}: Completed!')
         data = {}
