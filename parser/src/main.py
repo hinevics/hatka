@@ -95,7 +95,7 @@ def parser():
 
                 data[number] = rent
                 logger.debug(f'parsing flat {number}: Completed!')
-        with open(path_save + f"/data_{n}.pkl", "wb") as file:
+        with open(str(path_save) + f"/data_{n}.pkl", "wb") as file:
             pickle.dump(data, file)
         logger.info(f'parsing page {n}: Completed!')
         data = {}
