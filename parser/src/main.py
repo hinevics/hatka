@@ -5,6 +5,7 @@ import logging
 import colorlog
 import pickle
 import pathlib
+import multiprocessing
 
 from config import PATH_SAVE
 
@@ -36,70 +37,70 @@ def get_page(url: str, number: int) -> str:
     return response
 
 
-def parser():
-    path_save = pathlib.Path(PATH_SAVE)
-    if not path_save.exists():
-        raise FileExistsError('Path not normal!!!')
+def parser(page_number):
     data = {}
-    URL_PAGE = r'https://realt.by/belarus/rent/flat-for-long/?page={number}'
-    URL_BASE = r'https://realt.by'
-    NUMBER_PAGES = 125
-    for n in range(1, NUMBER_PAGES + 1):
-        logger.info(f'parsing page {n}: Start!')
-        html = get_page(url=URL_PAGE, number=n)
-        soup = BeautifulSoup(html.content, 'html.parser')
-        div_elements_with_data_index = soup.find_all('div', {'data-index': True})
+    logger.info(f'parsing page {page_number}: Start!')
+    html = get_page(url=URL_PAGE, number=page_number)
+    soup = BeautifulSoup(html.content, 'html.parser')
+    div_elements_with_data_index = soup.find_all('div', {'data-index': True})
 
-        for rent in div_elements_with_data_index:
-            href = rent.find_all('a')[0]
-            number = find_number(href)
-            logger.debug(f'parsing flat {number}: Start!')
-            new_url = URL_BASE + href['href']
-            response = requests.get(new_url)
-            soup_rent = BeautifulSoup(response.content, 'html.parser')
-            if not str(n) in data.keys():
-                rent = {
-                    'href': new_url
-                }
+    for rent in div_elements_with_data_index:
+        href = rent.find_all('a')[0]
+        number = find_number(href)
+        logger.debug(f'parsing flat {number}: Start!')
+        new_url = URL_BASE + href['href']
+        response = requests.get(new_url)
+        soup_rent = BeautifulSoup(response.content, 'html.parser')
+        if not str(number) in data.keys():
+            rent = {
+                'href': new_url
+            }
 
-                # Title
-                title_list = soup_rent.select('h1.order-1')
-                title = title_list[0].text if title_list else None
-                logger.debug(f'received: title: {title}')
-                rent['title'] = title
+            # Title
+            title_list = soup_rent.select('h1.order-1')
+            title = title_list[0].text if title_list else None
+            logger.debug(f'received: title: {title}')
+            rent['title'] = title
 
-                # Text
-                text_list = soup_rent.select('section.bg-white:nth-child(3) > div:nth-child(2)')
-                text = ' '.join([i.text for i in text_list]) if text_list else ''
-                logger.debug(f'received: text: {text[:20]}')
-                rent['text'] = text
+            # Text
+            text_list = soup_rent.select('section.bg-white:nth-child(3) > div:nth-child(2)')
+            text = ' '.join([i.text for i in text_list]) if text_list else ''
+            logger.debug(f'received: text: {text[:20]}')
+            rent['text'] = text
 
-                # Note
-                note_list = soup_rent.select('section.bg-white:nth-child(6) > div:nth-child(2)')
-                note = ' '.join([i.text for i in note_list]) if note_list else ''
-                logger.debug(f'received: note: {note[:20]}')
-                rent['note'] = note
+            # Note
+            note_list = soup_rent.select('section.bg-white:nth-child(6) > div:nth-child(2)')
+            note = ' '.join([i.text for i in note_list]) if note_list else ''
+            logger.debug(f'received: note: {note[:20]}')
+            rent['note'] = note
 
-                # Adres
-                adres_list = soup_rent.select(r'li.md\:w-auto')
-                adres = adres_list[0].text if adres_list else None
-                logger.debug(f'received: adres: {adres}')
-                rent['adres'] = adres
+            # Adres
+            adres_list = soup_rent.select(r'li.md\:w-auto')
+            adres = adres_list[0].text if adres_list else None
+            logger.debug(f'received: adres: {adres}')
+            rent['adres'] = adres
 
-                # Price
-                price_list = soup_rent.select(
-                    r'.md\:items-center > div:nth-child(1) > h2:nth-child(1)')
-                price = price_list[0].text if price_list else None
-                logger.debug(f'received: price: {price}')
-                rent['price'] = price
+            # Price
+            price_list = soup_rent.select(
+                r'.md\:items-center > div:nth-child(1) > h2:nth-child(1)')
+            price = price_list[0].text if price_list else None
+            logger.debug(f'received: price: {price}')
+            rent['price'] = price
 
-                data[number] = rent
-                logger.debug(f'parsing flat {number}: Completed!')
-        with open(str(path_save) + f"/data_{n}.pkl", "wb") as file:
-            pickle.dump(data, file)
-        logger.info(f'parsing page {n}: Completed!')
-        data = {}
+            data[number] = rent
+            logger.debug(f'parsing flat {number}: Completed!')
+    with open(str(path_save) + f"/data_{page_number}.pkl", "wb") as file:
+        pickle.dump(data, file)
+    logger.info(f'parsing page {page_number}: Completed!')
+    data = {}
 
 
 if __name__ == "__main__":
-    parser()
+    path_save = pathlib.Path(PATH_SAVE)
+    if not path_save.exists():
+        raise FileExistsError('Path not normal!!!')
+    URL_PAGE = r'https://realt.by/belarus/rent/flat-for-long/?page={number}'
+    URL_BASE = r'https://realt.by'
+    NUMBER_PAGES = 125
+    with multiprocessing.Pool() as pool:
+        pool.map(parser, range(1, NUMBER_PAGES + 1))
