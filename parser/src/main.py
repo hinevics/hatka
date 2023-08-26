@@ -64,33 +64,33 @@ def parser():
 
                 # Title
                 title_list = soup_rent.select('h1.order-1')
-                if title_list:
-                    title = title_list[0].text
-                    logger.debug(f'received: title: {title}')
-                else:
-                    title = None
-                    logger.error(f'received: title: {title}')
+                title = title_list[0].text if title_list else None
+                logger.debug(f'received: title: {title}')
                 rent['title'] = title
+
+                # Text
+                text_list = soup_rent.select('section.bg-white:nth-child(3) > div:nth-child(2)')
+                text = ' '.join([i.text for i in text_list]) if text_list else ''
+                logger.debug(f'received: text: {text[:20]}')
+                rent['text'] = text
+
+                # Note
+                note_list = soup_rent.select('section.bg-white:nth-child(6) > div:nth-child(2)')
+                note = ' '.join([i.text for i in note_list]) if note_list else ''
+                logger.debug(f'received: note: {note[:20]}')
+                rent['note'] = note
 
                 # Adres
                 adres_list = soup_rent.select(r'li.md\:w-auto')
-                if adres_list:
-                    adres = adres_list[0].text
-                    logger.debug(f'received: adres: {adres}')
-                else:
-                    adres = None
-                    logger.error(f'received: adres: {adres}')
+                adres = adres_list[0].text if adres_list else None
+                logger.debug(f'received: adres: {adres}')
                 rent['adres'] = adres
 
                 # Price
                 price_list = soup_rent.select(
                     r'.md\:items-center > div:nth-child(1) > h2:nth-child(1)')
-                if price_list:
-                    price = price_list[0].text
-                    logger.debug(f'received: price: {price}')
-                else:
-                    price = None
-                    logger.error(f'received: price: {price}')
+                price = price_list[0].text if price_list else None
+                logger.debug(f'received: price: {price}')
                 rent['price'] = price
 
                 data[number] = rent
