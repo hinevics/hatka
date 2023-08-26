@@ -47,7 +47,7 @@ def parser(page_number):
     for rent in div_elements_with_data_index:
         href = rent.find_all('a')[0]
         number = find_number(href)
-        logger.debug(f'parsing flat {number}: Start!')
+        logger.debug(f'page: {page_number}. parsing flat {number}: Start!')
         new_url = URL_BASE + href['href']
         response = requests.get(new_url)
         soup_rent = BeautifulSoup(response.content, 'html.parser')
@@ -59,36 +59,36 @@ def parser(page_number):
             # Title
             title_list = soup_rent.select('h1.order-1')
             title = title_list[0].text if title_list else None
-            logger.debug(f'received: title: {title}')
+            logger.debug(f'page: {page_number}. received: title: {title}')
             rent['title'] = title
 
             # Text
             text_list = soup_rent.select('section.bg-white:nth-child(3) > div:nth-child(2)')
             text = ' '.join([i.text for i in text_list]) if text_list else ''
-            logger.debug(f'received: text: {text[:20]}')
+            logger.debug(f'page: {page_number}. received: text: {text[:20]}')
             rent['text'] = text
 
             # Note
             note_list = soup_rent.select('section.bg-white:nth-child(6) > div:nth-child(2)')
             note = ' '.join([i.text for i in note_list]) if note_list else ''
-            logger.debug(f'received: note: {note[:20]}')
+            logger.debug(f'page: {page_number}. received: note: {note[:20]}')
             rent['note'] = note
 
             # Adres
             adres_list = soup_rent.select(r'li.md\:w-auto')
             adres = adres_list[0].text if adres_list else None
-            logger.debug(f'received: adres: {adres}')
+            logger.debug(f'page: {page_number}. received: adres: {adres}')
             rent['adres'] = adres
 
             # Price
             price_list = soup_rent.select(
                 r'.md\:items-center > div:nth-child(1) > h2:nth-child(1)')
             price = price_list[0].text if price_list else None
-            logger.debug(f'received: price: {price}')
+            logger.debug(f'page: {page_number}. received: price: {price}')
             rent['price'] = price
 
             data[number] = rent
-            logger.debug(f'parsing flat {number}: Completed!')
+            logger.debug(f'page: {page_number}. parsing flat {number}: Completed!')
     with open(str(path_save) + f"/data_{page_number}.pkl", "wb") as file:
         pickle.dump(data, file)
     logger.info(f'parsing page {page_number}: Completed!')
