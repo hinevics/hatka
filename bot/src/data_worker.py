@@ -6,8 +6,8 @@ import csv
 from config import PATH_DATA_USER, PATH_DATA_USERACTION
 
 
-header_action = ["user_name", "action", 'dtime']
-header_user_data = ["user_name", "flat_id", "like", "dtime"]
+# header_action = ["user_name", "action", 'dtime']
+# header_user_data = ["user_name", "flat_id", "like", "dtime"]
 
 
 def update_action(data: list[tuple[Any]]):
@@ -19,7 +19,7 @@ def update_action(data: list[tuple[Any]]):
 
     with open(PATH_DATA_USERACTION, mode="a", newline="") as csvfile:
         csvwriter = csv.writer(csvfile)
-        csvwriter.writerow(header_action)
+        # csvwriter.writerow(header_action)
 
         for row in data:
             csvwriter.writerow(row)
@@ -33,7 +33,7 @@ def update_user(data: list[tuple[Any]]):
     """
     with open(PATH_DATA_USER, mode="a", newline="") as csvfile:
         csvwriter = csv.writer(csvfile)
-        csvwriter.writerow(header_user_data)
+        # csvwriter.w(header_user_data)
 
         for row in data:
             csvwriter.writerow(row)
