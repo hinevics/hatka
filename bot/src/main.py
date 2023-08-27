@@ -15,18 +15,20 @@ END = ConversationHandler.END
 
 
 async def start(update: Update, context: ContextTypes.DEFAULT_TYPE):
-    user_name = update.effective_chat
-    logger.info(f'The user {user_name.username} launched the bot')
+    user = update.effective_chat
+    logger.info(f'The user (username={user.username}) launched the bot')
     keyboard = [
             [InlineKeyboardButton("Нажимай тут ➡️", callback_data="give")]
         ]
     reply_markup = InlineKeyboardMarkup(keyboard)
     await update.message.reply_text(
-        "Привет! Я бот Hatka. Я помогу найти тебе квартиру!\nНажми для старта: ",
+        f"Привет, {user.full_name}! Я бот Hatka. Я помогу найти тебе квартиру!\nНажми для старта: ",
         reply_markup=reply_markup)
 
 
 async def give(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
+    user = update.effective_chat
+    logger.info(f"The user (username={user.username}) clicked the button (button=give)")
     keyboard = [
             [InlineKeyboardButton("👍", callback_data="like"),
              InlineKeyboardButton("👎", callback_data="dislike")]
@@ -50,6 +52,7 @@ async def like():
         - нажатие вызывает новый вариант "похожей" кв
         - сохраняет информацию что для этого пользователя кв нрав
     """
+    
 
 
 async def dislike():
