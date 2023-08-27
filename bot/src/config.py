@@ -5,3 +5,5 @@ load_dotenv()
 
 TOKEN = os.getenv('TOKEN')
 PATH_TEST_FLAT = os.getenv("PATH_TEST_FLAT")
+LOG_PATH = os.getenv('LOG_PATH')
+LOG_ERROR_PATH = os.getenv('LOG_ERROR_PATH')
