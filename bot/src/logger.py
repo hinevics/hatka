@@ -3,6 +3,12 @@ import colorlog
 
 from config import LOG_PATH, LOG_ERROR_PATH
 
+
+logging.basicConfig(
+    format='%(asctime)s - %(name)s - %(levelname)s - %(message)s',
+    level=logging.INFO)
+
+
 # format logs
 log_format = '%(asctime)s - %(name)s - %(levelname)s - %(message)s'
 color_format = '%(log_color)s' + log_format
@@ -13,11 +19,11 @@ formatter_file = logging.Formatter(
 
 # all logs
 logger = logging.getLogger('logger')
-logger.setLevel(logging.DEBUG)
+logger.setLevel(logging.INFO)
 file_handler = logging.FileHandler(LOG_PATH)
-file_handler.setLevel(logging.DEBUG)
+file_handler.setLevel(logging.INFO)
 console_handler = logging.StreamHandler()
-console_handler.setLevel(logging.DEBUG)
+console_handler.setLevel(logging.INFO)
 file_handler.setFormatter(formatter_file)
 console_handler.setFormatter(formatter_console)
 logger.addHandler(file_handler)
