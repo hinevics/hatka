@@ -1,5 +1,3 @@
-import logging
-
 from telegram import Update, InlineKeyboardMarkup, InlineKeyboardButton
 
 from telegram.ext import (
@@ -10,17 +8,15 @@ from telegram.ext import (
 from config import TOKEN
 from flat import get_test_flat
 
-logging.basicConfig(
-    format='%(asctime)s - %(name)s - %(levelname)s - %(message)s',
-    level=logging.INFO)
-
-logger = logging.getLogger(__name__)
+from logger import logger, error_logger
 
 
 END = ConversationHandler.END
 
 
 async def start(update: Update, context: ContextTypes.DEFAULT_TYPE):
+    user_name = update.effective_chat
+    logger.info(f'The user {user_name.username} launched the bot')
     keyboard = [
             [InlineKeyboardButton("Нажимай тут ➡️", callback_data="give")]
         ]
@@ -54,7 +50,6 @@ async def like():
         - нажатие вызывает новый вариант "похожей" кв
         - сохраняет информацию что для этого пользователя кв нрав
     """
-
 
 
 async def dislike():
