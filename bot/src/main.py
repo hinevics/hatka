@@ -14,13 +14,21 @@ from logger import logger, error_logger
 END = ConversationHandler.END
 
 
+def get_keyboard(texts: list[str], callback_data: list[str]):
+    keyboard = [
+            [InlineKeyboardButton(t, callback_data=c) for t, c in zip(texts, callback_data)]
+        ]
+    reply_markup = InlineKeyboardMarkup(keyboard)
+    return reply_markup
+
+
 async def start(update: Update, context: ContextTypes.DEFAULT_TYPE):
     user = update.effective_chat
     logger.info(f'The user (username={user.username}) launched the bot')
-    keyboard = [
-            [InlineKeyboardButton("Нажимай тут ➡️", callback_data="give")]
-        ]
-    reply_markup = InlineKeyboardMarkup(keyboard)
+    reply_markup = get_keyboard(
+        texts=["Нажимай тут ➡️"],
+        callback_data=["give"]
+    )
     await update.message.reply_text(
         f"Привет, {user.full_name}! Я бот Hatka. Я помогу найти тебе квартиру!\nНажми для старта: ",
         reply_markup=reply_markup)
@@ -29,11 +37,10 @@ async def start(update: Update, context: ContextTypes.DEFAULT_TYPE):
 async def give(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
     user = update.effective_chat
     logger.info(f"The user (username={user.username}) clicked the button (button=give)")
-    keyboard = [
-            [InlineKeyboardButton("👍", callback_data="like"),
-             InlineKeyboardButton("👎", callback_data="dislike")]
-        ]
-    reply_markup = InlineKeyboardMarkup(keyboard)
+    reply_markup = get_keyboard(
+        texts=["👍", "👎"],
+        callback_data=["like", "dislike"]
+    )
     query = update.callback_query
     await query.answer()
 
@@ -46,13 +53,32 @@ async def give(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
         reply_markup=reply_markup, parse_mode='Markdown')
 
 
-async def like():
+async def like(update: Update, context: ContextTypes.DEFAULT_TYPE):
     """Ожидается что это будет кнопка нравится.
     TODO:
         - нажатие вызывает новый вариант "похожей" кв
         - сохраняет информацию что для этого пользователя кв нрав
     """
-    
+    user = update.effective_chat
+
+    logger.info(f"The user (username={user.username}) clicked the button (button=like)")
+
+    reply_markup = get_keyboard(
+        texts=["👍", "👎"],
+        callback_data=["like", "dislike"]
+    )
+
+    query = update.callback_query
+
+    await query.answer()
+
+    data = get_test_flat()
+    link = f"[🔗 открыть объявление]({data['href']})"
+    answer = f"*{data['title']}*\n\n{link}"
+
+    await query.edit_message_text(
+        text=answer,
+        reply_markup=reply_markup, parse_mode='Markdown')
 
 
 async def dislike():
@@ -83,6 +109,7 @@ def main():
     app = ApplicationBuilder().token(TOKEN).build()
     app.add_handler(CommandHandler("start", start))
     app.add_handler(CallbackQueryHandler(give, pattern='give'))
+    app.add_handler(CallbackQueryHandler(like, pattern='like'))
     app.run_polling(allowed_updates=Update.ALL_TYPES)
 
 
