@@ -1,7 +1,7 @@
 import logging
 import colorlog
 
-from myconfig import LOG_PATH, LOG_ERROR_PATH
+from config import LOG_PATH, LOG_ERROR_PATH
 
 # format logs
 log_format = '%(asctime)s - %(name)s - %(levelname)s - %(message)s'
