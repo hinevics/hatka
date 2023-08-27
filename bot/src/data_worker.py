@@ -6,8 +6,8 @@ import csv
 from config import PATH_DATA_USER, PATH_DATA_USERACTION
 
 
-header_action = ["user_name", "action"]
-header_user_data = ["user_name", "flat_id", "like"]
+header_action = ["user_name", "action", 'dtime']
+header_user_data = ["user_name", "flat_id", "like", "dtime"]
 
 
 def update_action(data: list[tuple[Any]]):
