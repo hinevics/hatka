@@ -11,7 +11,7 @@ def get_test_flat():
 
     return {
         "id": flat_id,
-        "title": data["title"],
-        "href": data["href"],
-        "adres": data["adres"]
+        "title": data[flat_id]["title"],
+        "href": data[flat_id]["href"],
+        "adres": data[flat_id]["adres"]
     }
