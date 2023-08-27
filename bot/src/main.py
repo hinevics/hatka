@@ -8,7 +8,7 @@ from telegram.ext import (
 from config import TOKEN
 from flat import get_test_flat
 
-from logger import logger, error_logger
+from logger import logger
 
 
 END = ConversationHandler.END
