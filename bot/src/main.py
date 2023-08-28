@@ -64,6 +64,8 @@ async def give(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
     link = f"[🔗 открыть объявление]({data['href']})"
     answer = f"*{data['title']}*\n\n{link}"
 
+    context.user_data["last_text"] = answer
+
     await query.edit_message_text(
         text=answer,
         reply_markup=reply_markup, parse_mode='Markdown')
@@ -100,9 +102,14 @@ async def like(update: Update, context: ContextTypes.DEFAULT_TYPE):
         data=[(user.username, data['id'], 'like', datetime.datetime.now())]
     )
 
-    await query.edit_message_text(
-        text=answer,
-        reply_markup=reply_markup, parse_mode='Markdown')
+    await query.edit_message_text(context.user_data["last_text"], parse_mode="Markdown")
+
+    context.user_data["last_text"] = answer
+
+    await query.message.reply_text(text=answer, reply_markup=reply_markup, parse_mode="Markdown")
+    # await query.edit_message_text(
+    #     text=answer,
+    #     reply_markup=reply_markup, parse_mode='Markdown')
 
 
 async def dislike(update: Update, context: ContextTypes.DEFAULT_TYPE):
@@ -138,9 +145,11 @@ async def dislike(update: Update, context: ContextTypes.DEFAULT_TYPE):
         data=[(user.username, data['id'], 'dislike', datetime.datetime.now())]
     )
 
+    context.user_data["last_text"] = answer
+
     await query.edit_message_text(
-            text=answer,
-            reply_markup=reply_markup, parse_mode='Markdown')
+        text=answer,
+        reply_markup=reply_markup, parse_mode='Markdown')
 
 
 async def stop(update: Update, context: ContextTypes.DEFAULT_TYPE):
@@ -161,7 +170,7 @@ def main():
     app.add_handler(CommandHandler("start", start))
     app.add_handler(CallbackQueryHandler(give, pattern='give'))
     app.add_handler(CallbackQueryHandler(like, pattern='like'))
-    app.add_handler(CallbackQueryHandler(like, pattern='dislike'))
+    app.add_handler(CallbackQueryHandler(dislike, pattern='dislike'))
     app.run_polling(allowed_updates=Update.ALL_TYPES)
 
 
