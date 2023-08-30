@@ -1,5 +1,6 @@
 import pickle
 import random
+
 from config import PATH_TEST_FLAT
 
 
