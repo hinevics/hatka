@@ -16,7 +16,8 @@ from config import PATH_SAVE, EXECUTABLE_PATH
 log_format = '%(asctime)s - %(name)s - %(levelname)s - %(message)s'
 color_format = '%(log_color)s' + log_format
 formatter_console = colorlog.ColoredFormatter(color_format)
-formatter_file = logging.Formatter('%(asctime)s - %(name)s - %(levelname)s - %(message)s')
+formatter_file = logging.Formatter(
+    '%(asctime)s - %(name)s - %(levelname)s - %(message)s')
 
 
 # all logs
@@ -83,7 +84,7 @@ def parser(page_number):
         driver.get(new_url)
         soup_rent = BeautifulSoup(driver.page_source, 'html.parser')
 
-        if not str(number) in data.keys():
+        if str(number) not in data.keys():
             rent = {
                 'href': new_url
             }
@@ -95,13 +96,15 @@ def parser(page_number):
             rent['title'] = title
 
             # Text
-            text_list = soup_rent.select('section.bg-white:nth-child(3) > div:nth-child(2)')
+            text_list = soup_rent.select(
+                'section.bg-white:nth-child(3) > div:nth-child(2)')
             text = ' '.join([i.text for i in text_list]) if text_list else ''
             logger.debug(f'page: {page_number}. received: text: {text[:20]}')
             rent['text'] = text
 
             # Note
-            note_list = soup_rent.select('section.bg-white:nth-child(6) > div:nth-child(2)')
+            note_list = soup_rent.select(
+                'section.bg-white:nth-child(6) > div:nth-child(2)')
             note = ' '.join([i.text for i in note_list]) if note_list else ''
             logger.debug(f'page: {page_number}. received: note: {note[:20]}')
             rent['note'] = note
@@ -130,7 +133,8 @@ def parser(page_number):
             rent['params'] = params
 
             # owners
-            select_owners = soup_rent.select(r'div.md\:p-6:nth-child(1) > div:nth-child(2)')
+            select_owners = soup_rent.select(
+                r'div.md\:p-6:nth-child(1) > div:nth-child(2)')
             owners = select_owners[0].text if select_owners else None
             rent['owners'] = owners
 
