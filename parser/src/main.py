@@ -28,7 +28,7 @@ console_handler.setLevel(logging.DEBUG)
 console_handler.setFormatter(formatter_console)
 logger.addHandler(console_handler)
 
-URL_PAGE = r'https://realt.by/belarus/rent/flat-for-long/?page={number}'
+URL_PAGE = r'https://realt.by/belarus/rent/flat-for-long/?page={page_number}'
 URL_BASE = r'https://realt.by'
 NUMBER_PAGES = 125
 
