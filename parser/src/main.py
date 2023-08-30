@@ -1,6 +1,5 @@
 import re
 from bs4 import BeautifulSoup
-import requests
 import logging
 import colorlog
 import pickle
@@ -71,8 +70,11 @@ def parser(page_number):
     div_elements_with_data_index = soup.find_all('div', {'data-index': True})
 
     for rent in div_elements_with_data_index:
+
+        # Ссылка на объявление
         href = rent.find_all('a')[0]
 
+        # Номер объявления
         number = find_number(href)
 
         logger.debug(f'page: {page_number}. parsing flat {number}: Start!')
@@ -116,6 +118,28 @@ def parser(page_number):
             price = price_list[0].text if price_list else None
             logger.debug(f'page: {page_number}. received: price: {price}')
             rent['price'] = price
+
+            # Other Params
+            params = {}
+            selected_params = soup_rent.select(r'ul.w-full:nth-child(2)')
+            li_params = selected_params[0].find_all('li')
+            for li in li_params:
+                name_params = li.find_all('span')[0].text
+                value_params = li.find_all('p')[0].text
+                params[name_params] = value_params
+            rent['params'] = params
+
+            # owners
+            select_owners = soup_rent.select(r'div.md\:p-6:nth-child(1) > div:nth-child(2)')
+            owners = select_owners[0].text if select_owners else None
+            rent['owners'] = owners
+
+            # conveniences
+            select_conveniences = soup_rent.select(
+                r'section.bg-white:nth-child(5) > div:nth-child(2)')
+            p_conveniences = select_conveniences[0].find_all('p') if select_conveniences else None
+            conveniences = [c.text for c in p_conveniences] if p_conveniences else None
+            rent['conveniences'] = conveniences
 
             data[number] = rent
             logger.debug(f'page: {page_number}. parsing flat {number}: Completed!')
