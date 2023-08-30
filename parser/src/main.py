@@ -7,7 +7,11 @@ import pickle
 import pathlib
 import multiprocessing
 
-from config import PATH_SAVE
+from selenium import webdriver
+from selenium.webdriver.firefox.options import Options as FirefoxOptions
+from selenium.webdriver.firefox.service import Service
+
+from config import PATH_SAVE, EXECUTABLE_PATH
 
 # format logs
 log_format = '%(asctime)s - %(name)s - %(levelname)s - %(message)s'
@@ -24,6 +28,10 @@ console_handler.setLevel(logging.DEBUG)
 console_handler.setFormatter(formatter_console)
 logger.addHandler(console_handler)
 
+URL_PAGE = r'https://realt.by/belarus/rent/flat-for-long/?page={number}'
+URL_BASE = r'https://realt.by'
+NUMBER_PAGES = 125
+
 
 def find_number(href: str):
     res = href['aria-label']
@@ -31,26 +39,48 @@ def find_number(href: str):
     return res.group('number')
 
 
-def get_page(url: str, number: int) -> str:
+def get_page(driver, url: str, number: int) -> str:
     url = url.format(number=number)
-    response = requests.get(url)
-    return response
+    driver.get(r'https://realt.by/rent/flat-for-long/?page=1')
+    return driver
+
+
+def get_driver():
+    options = FirefoxOptions()
+    options.add_argument('--headless')
+    firefox_service = Service(EXECUTABLE_PATH)
+    driver = webdriver.Firefox(
+        service=firefox_service,
+        options=options
+    )
+    return driver
 
 
 def parser(page_number):
+    driver = get_driver()
+    driver.get(
+        URL_PAGE.format(page_number=page_number)
+    )
+
     data = {}
     logger.info(f'parsing page {page_number}: Start!')
-    html = get_page(url=URL_PAGE, number=page_number)
+    html = driver.page_source
     soup = BeautifulSoup(html.content, 'html.parser')
+
+    # Забираю объявления
     div_elements_with_data_index = soup.find_all('div', {'data-index': True})
 
     for rent in div_elements_with_data_index:
         href = rent.find_all('a')[0]
+
         number = find_number(href)
+
         logger.debug(f'page: {page_number}. parsing flat {number}: Start!')
+
         new_url = URL_BASE + href['href']
-        response = requests.get(new_url)
-        soup_rent = BeautifulSoup(response.content, 'html.parser')
+        driver.get(new_url)
+        soup_rent = BeautifulSoup(driver.page_source, 'html.parser')
+
         if not str(number) in data.keys():
             rent = {
                 'href': new_url
@@ -99,8 +129,5 @@ if __name__ == "__main__":
     path_save = pathlib.Path(PATH_SAVE)
     if not path_save.exists():
         raise FileExistsError('Path not normal!!!')
-    URL_PAGE = r'https://realt.by/belarus/rent/flat-for-long/?page={number}'
-    URL_BASE = r'https://realt.by'
-    NUMBER_PAGES = 125
     with multiprocessing.Pool() as pool:
         pool.map(parser, range(1, NUMBER_PAGES + 1))
