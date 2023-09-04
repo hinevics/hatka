@@ -65,7 +65,7 @@ def parser(page_number):
     data = {}
     logger.info(f'parsing page {page_number}: Start!')
     html = driver.page_source
-    soup = BeautifulSoup(html.content, 'html.parser')
+    soup = BeautifulSoup(html, 'html.parser')
 
     # Забираю объявления
     div_elements_with_data_index = soup.find_all('div', {'data-index': True})
