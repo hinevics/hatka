@@ -52,23 +52,29 @@ async def give(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
         data=[(user.username, 'give', datetime.datetime.now())]
     )
 
-    reply_markup = get_keyboard(
-        texts=["👍", "👎"],
-        callback_data=["like", "dislike"]
-    )
-
     query = update.callback_query
+
     await query.answer()
 
-    data = get_test_flat()
-    link = f"[🔗 открыть объявление]({data['href']})"
-    answer = f"*{data['title']}*\n\n{link}"
-
-    context.user_data["last_text"] = answer
+    reply_markup = get_keyboard(
+        texts=["Опросник", "Начать"],
+        callback_data=["get_poll", "get_first_flat"]
+    )
 
     await query.edit_message_text(
-        text=answer,
-        reply_markup=reply_markup, parse_mode='Markdown')
+        text=f"{user.full_name}, Выбирете как мы начнем?",
+        reply_markup=reply_markup)
+
+
+async def get_poll():
+    """Функция для опроса и создания фильтров
+    """
+
+
+async def get_first_flat():
+    """Первое обявление
+    """
+    pass
 
 
 async def like(update: Update, context: ContextTypes.DEFAULT_TYPE):
