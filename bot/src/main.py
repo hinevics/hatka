@@ -112,6 +112,14 @@ async def get_price_limit(update: Update, context: ContextTypes.DEFAULT_TYPE):
 
     if choice_nrooms == 'choice_1':
         context.user_data['choice_nrooms'] = '1'
+    elif choice_nrooms == 'choice_2':
+        context.user_data['choice_nrooms'] = '2'
+    elif choice_nrooms == 'choice_3':
+        context.user_data['choice_nrooms'] = '3'
+    elif choice_nrooms == 'choice_4':
+        context.user_data['choice_nrooms'] = '4'
+    elif choice_nrooms == 'choice_studio':
+        context.user_data['choice_nrooms'] = 'studio'
     logger.info(f'The user (username={user}) choice_nrooms={choice_nrooms}')
     # TODO: логика которая записывает выбор и будет использует его для обучения
 
@@ -149,8 +157,16 @@ async def get_about(update: Update, context: ContextTypes.DEFAULT_TYPE):
     query = update.callback_query
     user = update.effective_chat
     choice_price = query.data
-    if choice_price == '250_300':
+    if choice_price == '150_200':
+        context.user_data['choice_price'] = "150$-200$"
+    if choice_price == '200_250':
+        context.user_data['choice_price'] = "200$-250$"
+    elif choice_price == '250_300':
         context.user_data['choice_price'] = "250$-300$"
+    elif choice_price == '300_350':
+        context.user_data['choice_price'] = "300$-350$"
+    elif choice_price == 'bolee350':
+        context.user_data['choice_price'] = ">350$"
     logger.info(f'The user (username={user}) choice_price={choice_price}')
 
     await query.answer()
@@ -223,93 +239,102 @@ async def start_flat_selection(update: Update, context: ContextTypes.DEFAULT_TYP
     query = update.callback_query
 
     await query.answer()
+
+    # TODO: Вынести это в отдельную функцию
     data = get_test_flat()
     link = f"[🔗 открыть объявление]({data['href']})"
-    answer = f"*{data['title']}*\n\n{link}"
+    rooms = f"Комнат: {data['rooms']}"
+    price = f"Цена: {data['price']}"
+    answer = f"*{data['title']}*\n\n🌇{data['adres']}\n\n{rooms}\n\n{price}\n\n{link}"
 
     await query.edit_message_text(
         text=answer,
         reply_markup=reply_markup, parse_mode='Markdown')
 
-# async def like(update: Update, context: ContextTypes.DEFAULT_TYPE):
-#     """Ожидается что это будет кнопка нравится.
-#     TODO:
-#         - нажатие вызывает новый вариант "похожей" кв
-#         - сохраняет информацию что для этого пользователя кв нрав
-#     """
-#     user = update.effective_chat
 
-#     logger.info(f"The user (username={user.username}) clicked the button (button=like)")
+async def like(update: Update, context: ContextTypes.DEFAULT_TYPE):
+    """Ожидается что это будет кнопка нравится.
+    TODO:
+        - нажатие вызывает новый вариант "похожей" кв
+        - сохраняет информацию что для этого пользователя кв нрав
+    """
+    user = update.effective_chat
 
-#     update_action(
-#         data=[(user.username, 'like', datetime.datetime.now())]
-#     )
+    logger.info(f"The user (username={user.username}) clicked the button (button=like)")
 
-#     reply_markup = get_keyboard(
-#         texts=["👍", "👎"],
-#         callback_data=["like", "dislike"]
-#     )
+    update_action(
+        data=[(user.username, 'like', datetime.datetime.now())]
+    )
 
-#     query = update.callback_query
+    reply_markup = get_keyboard(
+        texts=["👍", "👎"],
+        callback_data=["like", "dislike"]
+    )
 
-#     await query.answer()
+    query = update.callback_query
 
-#     data = get_test_flat()
-#     link = f"[🔗 открыть объявление]({data['href']})"
-#     answer = f"*{data['title']}*\n\n{link}"
+    await query.answer()
 
-#     update_user(
-#         data=[(user.username, data['id'], 'like', datetime.datetime.now())]
-#     )
+    data = get_test_flat()
+    link = f"[🔗 открыть объявление]({data['href']})"
+    rooms = f"Комнат: {data['rooms']}"
+    price = f"Цена: {data['price']}"
+    answer = f"*{data['title']}*\n\n🌇{data['adres']}\n\n{rooms}\n\n{price}\n\n{link}"
 
-#     await query.edit_message_text(context.user_data["last_text"], parse_mode="Markdown")
+    update_user(
+        data=[(user.username, data['id'], 'like', datetime.datetime.now())]
+    )
 
-#     context.user_data["last_text"] = answer
+    # await query.edit_message_text(context.user_data["last_text"], parse_mode="Markdown")
 
-#     await query.message.reply_text(text=answer, reply_markup=reply_markup, parse_mode="Markdown")
-#     # await query.edit_message_text(
-#     #     text=answer,
-#     #     reply_markup=reply_markup, parse_mode='Markdown')
+    # context.user_data["last_text"] = answer
+
+    await query.message.reply_text(text=answer, reply_markup=reply_markup, parse_mode="Markdown")
+    # await query.edit_message_text(
+    #     text=answer,
+    #     reply_markup=reply_markup, parse_mode='Markdown')
 
 
-# async def dislike(update: Update, context: ContextTypes.DEFAULT_TYPE):
-#     """Ожидается что это будет кнопка ненрав.
-#     TODO:
-#         - помечает что данный тип квартиры не нравится
-#         - отправляет новый результат с учетом "пожелания"
-#         - отправляет бекенду на сохранение информации,
-#             что для этого пользователя не нравятся такие квартиры
-#     """
-#     user = update.effective_chat
+async def dislike(update: Update, context: ContextTypes.DEFAULT_TYPE):
+    """Ожидается что это будет кнопка ненрав.
+    TODO:
+        - помечает что данный тип квартиры не нравится
+        - отправляет новый результат с учетом "пожелания"
+        - отправляет бекенду на сохранение информации,
+            что для этого пользователя не нравятся такие квартиры
+    """
+    user = update.effective_chat
 
-#     logger.info(f"The user (username={user.username}) clicked the button (button=dislike)")
+    logger.info(f"The user (username={user.username}) clicked the button (button=dislike)")
 
-#     update_action(
-#         data=[(user.username, 'dislike', datetime.datetime.now())]
-#     )
+    update_action(
+        data=[(user.username, 'dislike', datetime.datetime.now())]
+    )
 
-#     reply_markup = get_keyboard(
-#         texts=["👍", "👎"],
-#         callback_data=["like", "dislike"]
-#     )
+    reply_markup = get_keyboard(
+        texts=["👍", "👎"],
+        callback_data=["like", "dislike"]
+    )
 
-#     query = update.callback_query
+    query = update.callback_query
 
-#     await query.answer()
+    await query.answer()
 
-#     data = get_test_flat()
-#     link = f"[🔗 открыть объявление]({data['href']})"
-#     answer = f"*{data['title']}*\n\n{link}"
+    data = get_test_flat()
+    link = f"[🔗 открыть объявление]({data['href']})"
+    rooms = f"Комнат: {data['rooms']}"
+    price = f"Цена: {data['price']}"
+    answer = f"*{data['title']}*\n\n🌇{data['adres']}\n\n{rooms}\n\n{price}\n\n{link}"
 
-#     update_user(
-#         data=[(user.username, data['id'], 'dislike', datetime.datetime.now())]
-#     )
+    update_user(
+        data=[(user.username, data['id'], 'dislike', datetime.datetime.now())]
+    )
 
-#     context.user_data["last_text"] = answer
+    context.user_data["last_text"] = answer
 
-#     await query.edit_message_text(
-#         text=answer,
-#         reply_markup=reply_markup, parse_mode='Markdown')
+    await query.edit_message_text(
+        text=answer,
+        reply_markup=reply_markup, parse_mode='Markdown')
 
 
 # async def stop(update: Update, context: ContextTypes.DEFAULT_TYPE):
@@ -353,6 +378,12 @@ def main():
         )
     app.add_handler(
             CallbackQueryHandler(start_flat_selection, pattern='start_flat_selection')
+        )
+    app.add_handler(
+            CallbackQueryHandler(like, pattern='like')
+        )
+    app.add_handler(
+            CallbackQueryHandler(dislike, pattern='dislike')
         )
 
     app.run_polling(allowed_updates=Update.ALL_TYPES)
