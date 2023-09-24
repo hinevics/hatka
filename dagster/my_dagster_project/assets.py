@@ -8,3 +8,19 @@ from dagster import asset, get_dagster_logger
 @asset
 def test_print() -> None:
     print('TEST')
+
+
+@asset
+def as_1() -> dict:
+    return {'1': 1}
+
+
+@asset
+def as_2() -> dict:
+    return {'2': 2}
+
+
+@asset
+def as_3(as_2: dict, as_1: dict) -> None:
+    as_2.update(as_1)
+    return as_2
