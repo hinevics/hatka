@@ -3,7 +3,8 @@ import random
 
 @op
 def get_random():
-    return random.randint(0, 10)
+    r = [random.randint(0, 10) for _ in range(0, 100000)]
+    return r[0]
 
 @op
 def get_multi(rnd):
