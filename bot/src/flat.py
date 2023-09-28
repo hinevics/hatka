@@ -1,10 +1,11 @@
 import pickle
 import random
+import pandas as pd
 
-from config import PATH_TEST_FLAT
+from config import PATH_TEST_FLAT, PATH_DATA
 
 
-def load_model(path: str):
+def load_data(path: str):
     pass
 
 
@@ -22,3 +23,27 @@ def get_test_flat():
         "rooms": data[flat_id].get('Количество комнат', None),
         "price": data[flat_id]["price"]
     }
+
+
+def get_first_flat() -> dict:
+    data = pd.read_pickle(PATH_DATA)
+    random_index = list(data.index)[random.randint(0, len(data.index) - 1)]
+    answer = data.loc[random_index].to_dict()
+    answer['loc'] = random_index
+    return answer
+
+
+def find_flat(index: int) -> pd.Series:
+    data = pd.read_pickle(PATH_DATA)
+    answer = data.loc[index]
+    return answer
+
+
+def predict_like_flat(index: int) -> dict:
+    data = find_flat(index)
+    
+
+
+def predict_diselike_flat(index: int) -> dict:
+    data = find_flat(index)
+    print(data)
