@@ -26,6 +26,8 @@ def get_test_flat():
 
 
 def get_first_flat() -> dict:
+    """Функция возвращает рандомную квартиру
+    """
     data = pd.read_pickle(PATH_DATA)
     random_index = list(data.index)[random.randint(0, len(data.index) - 1)]
     answer = data.loc[random_index].to_dict()
@@ -34,14 +36,28 @@ def get_first_flat() -> dict:
 
 
 def find_flat(index: int) -> pd.Series:
+    """Функция для поиска квартиры в списке квартир
+
+    Args:
+        index (int): индекс квартиры
+
+    Returns:
+        pd.Series: _description_
+    """
     data = pd.read_pickle(PATH_DATA)
     answer = data.loc[index]
     return answer
 
 
 def predict_like_flat(index: int) -> dict:
+    """Функция выполняет предсказание если пользователь поставил лайк.
+    Тогда вектор квартиры X_liked
+    """
+
     data = find_flat(index)
-    
+    vector = data.vectors
+    index_predicted = predict()
+
 
 
 def predict_diselike_flat(index: int) -> dict:
