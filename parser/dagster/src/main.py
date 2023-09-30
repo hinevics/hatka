@@ -10,7 +10,7 @@ from selenium import webdriver
 from selenium.webdriver.firefox.options import Options as FirefoxOptions
 from selenium.webdriver.firefox.service import Service
 
-from config import PATH_SAVE, EXECUTABLE_PATH
+from .config import PATH_SAVE, EXECUTABLE_PATH
 
 # format logs
 log_format = '%(asctime)s - %(name)s - %(levelname)s - %(message)s'
