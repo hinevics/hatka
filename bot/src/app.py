@@ -10,7 +10,6 @@ from telegram.ext import (
 from config import TOKEN
 from flat import get_test_flat, get_first_flat, predict_like_flat
 from logger import logger
-from data_worker import update_action, update_user
 
 
 END = ConversationHandler.END
@@ -35,10 +34,6 @@ async def start(update: Update, context: ContextTypes.DEFAULT_TYPE):
     user = update.effective_chat
     context.user_data['state'] = 0
     logger.info(f'The user (username={user.username}) launched the bot')
-
-    # update_action(
-    #     data=[(user.username, 'start', datetime.datetime.now())]
-    # )
 
     reply_markup = get_keyboard(
         texts=["Нажимай тут ➡️"],
@@ -262,10 +257,6 @@ async def like(update: Update, context: ContextTypes.DEFAULT_TYPE):
 
     logger.info(f"The user (username={user.username}) clicked the button (button=like)")
 
-    # update_action(
-    #     data=[(user.username, 'like', datetime.datetime.now())]
-    # )
-
     reply_markup = get_keyboard(
         texts=["👍", "👎"],
         callback_data=["like", "dislike"]
@@ -285,9 +276,6 @@ async def like(update: Update, context: ContextTypes.DEFAULT_TYPE):
     answer = f"*{data['title']}*\n\n🌇{data['adres']}\n\n{rooms}\n\n{price}\n\n{link}"
     context.user_data['index_falt'] = data['loc']
     print('---like----', context.user_data['index_falt'])
-    # update_user(
-    #     data=[(user.username, data['id'], 'like', datetime.datetime.now())]
-    # )
 
     # await query.edit_message_text(context.user_data["last_text"], parse_mode="Markdown")
 
@@ -311,10 +299,6 @@ async def dislike(update: Update, context: ContextTypes.DEFAULT_TYPE):
 
     logger.info(f"The user (username={user.username}) clicked the button (button=dislike)")
 
-    update_action(
-        data=[(user.username, 'dislike', datetime.datetime.now())]
-    )
-
     reply_markup = get_keyboard(
         texts=["👍", "👎"],
         callback_data=["like", "dislike"]
@@ -329,10 +313,6 @@ async def dislike(update: Update, context: ContextTypes.DEFAULT_TYPE):
     rooms = f"Комнат: {data['rooms']}"
     price = f"Цена: {data['price']}"
     answer = f"*{data['title']}*\n\n🌇{data['adres']}\n\n{rooms}\n\n{price}\n\n{link}"
-
-    # update_user(
-    #     data=[(user.username, data['id'], 'dislike', datetime.datetime.now())]
-    # )
 
     context.user_data["last_text"] = answer
 
